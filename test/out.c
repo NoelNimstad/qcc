@@ -1,0 +1,1 @@
+int x = 4; const int y = 6; x = y; 
