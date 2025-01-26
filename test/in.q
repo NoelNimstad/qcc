@@ -1,9 +1,6 @@
 // #module Queue
+@mut int x = 4; // make x mutable
+int y = 6;      // y defaults to a constant
+x = y;          // set x to y
 
-// @nodiscard
-// @constant
-@mut int x = 4;
-int y = 6;
-x = y;
-
-// banana
+int add(int a, int b);

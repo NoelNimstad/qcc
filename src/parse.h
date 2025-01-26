@@ -23,6 +23,58 @@
 // case NODE_TYPE_double64:
 // case NODE_TYPE_double128:
 
+char *nodeTypeToString(Node *node)
+{
+    switch(node->type)
+    {
+    case NODE_TYPE_INT:
+        return "int";
+        break;
+    case NODE_TYPE_FLOAT:
+        return "float";
+        break;
+    case NODE_TYPE_DOUBLE:
+        return "double";
+        break;
+    case NODE_TYPE_VOID:
+        return "void";
+        break;
+    case NODE_TYPE_uint8:
+        return "unsigned char";
+        break;
+    case NODE_TYPE_sint8:
+        return "signed char";
+        break;
+    case NODE_TYPE_uint16:
+        return "unsigned short int";
+        break;
+    case NODE_TYPE_sint16:
+        return "signed short int";
+        break;
+    case NODE_TYPE_uint32:
+        return "unsigned long int";
+        break;
+    case NODE_TYPE_sint32:
+        return "signed long int";
+        break;
+    case NODE_TYPE_uint64:
+        return "unsigned long long int";
+        break;
+    case NODE_TYPE_sint64:
+        return "signed long long int";
+        break;
+    case NODE_TYPE_double64:
+        return "double";
+        break;
+    case NODE_TYPE_double128:
+        return "long double";
+        break;
+    default:
+        return "/*error*/";
+        break;
+    }
+}
+
 char *parseNode(Node *node)
 {
     if (node == NULL) return strdup("");
@@ -31,32 +83,26 @@ char *parseNode(Node *node)
     {
         case NODE_VARIABLE_DECLARATION:
         {
-            char *typeString = strdup(
-                (node->left->type == NODE_TYPE_INT)       ? "int"                    :
-                (node->left->type == NODE_TYPE_FLOAT)     ? "float"                  :
-                (node->left->type == NODE_TYPE_DOUBLE)    ? "double"                 :
-                (node->left->type == NODE_TYPE_VOID)      ? "void"                   :
-                (node->left->type == NODE_TYPE_uint8)     ? "unsigned char"          :
-                (node->left->type == NODE_TYPE_sint8)     ? "signed char"            :
-                (node->left->type == NODE_TYPE_uint16)    ? "unsigned short int"     :
-                (node->left->type == NODE_TYPE_sint16)    ? "signed short int"       :
-                (node->left->type == NODE_TYPE_uint32)    ? "unsigned long int"      :
-                (node->left->type == NODE_TYPE_sint32)    ? "signed long int"        :
-                (node->left->type == NODE_TYPE_uint64)    ? "unsigned long long int" :
-                (node->left->type == NODE_TYPE_sint64)    ? "signed long long int"   :
-                (node->left->type == NODE_TYPE_double64)  ? "double"                 :
-				(node->left->type == NODE_TYPE_double128) ? "long double"            :
-                                                            "/*error*/");
-                                                            
-			unsigned char mutable = (node->modifiers & MODIFIER_MUTABLE) == 0;
+            char *typeString = nodeTypeToString(node->left);      
+			unsigned char mutable = (node->modifiers & MODIFIER_MUTABLE) == 0; // for modifiers @mut / @mutable
             char *rightString = parseNode(node->right);
 
             size_t resultSize = strlen(typeString) + strlen(rightString) + 2 + (mutable ? 6 : 0);
             char *result = (char *)malloc(resultSize);
             snprintf(result, resultSize, "%s%s %s", (mutable ? "const ": ""), typeString, rightString);
 
-            free(typeString);
             free(rightString);
+            return result;
+        }
+        case NODE_FUNCTION_DECLARATION:
+        {
+            char *typeString = nodeTypeToString(node->left);
+            char *identifierString = parseNode(node->right);
+
+            size_t resultSize = strlen(typeString) + strlen(identifierString) + 4;
+            char *result = (char *)malloc(resultSize);
+            snprintf(result, resultSize, "%s %s()", typeString, identifierString);
+
             return result;
         }
         case NODE_VALUE_INT:

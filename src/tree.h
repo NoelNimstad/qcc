@@ -131,6 +131,7 @@ NodeType convertTokenTypeToNodeType(Token **inputToken)
 Node *parseExpression(Token **inputToken);
 Node *parseVariableDeclaration(Token **inputToken);
 Node *parseFunctionDeclaration(Token **inputToken);
+void freeNodeTree(Node *node);
 
 unsigned int currentModifiers;
 Node *generateNodeAtPosition(Node *position, Token **inputToken, Node *previous)
@@ -329,15 +330,73 @@ Node *parseFunctionDeclaration(Token **inputToken)
         printf("Error: Expected '(' after function name\n");
     }
 
+    Node *parameterList = NULL;
+    Node *lastParameter = NULL;
+
     (*inputToken)++;
     while((*inputToken)->type != TOKEN_RIGHT_ROUND_BRACKET)
     {
         if(tokenIsType(inputToken))
         {
-            printf("Banana!\n");
-        }
+            Node *parameter = (Node *)malloc(sizeof(Node));
+            parameter->type = NODE_FUNCTION_PARAMETER;
+            parameter->left = NULL;
+            parameter->right = NULL;
+            parameter->previous = NULL;
+            parameter->next = NULL;
+            parameter->modifiers = MODIFIER_NONE;
 
-        (*inputToken)++;
+            parameter->left = (Node *)malloc(sizeof(Node));
+            parameter->left->type = convertTokenTypeToNodeType(inputToken);
+            parameter->left->left = NULL;
+            parameter->left->right = NULL;
+
+            (*inputToken)++;
+
+            if (currentToken->type == TOKEN_IDENTIFIER)
+            {
+                parameter->right = (Node *)malloc(sizeof(Node));
+                parameter->right->type = NODE_IDENTIFIER;
+                parameter->right->left = NULL;
+                parameter->right->right = NULL;
+                parameter->right->previous = NULL;
+                parameter->right->next = NULL;
+                parameter->right->modifiers = MODIFIER_NONE;
+
+                parameter->value.string_value = strdup(currentToken->value.string_value);
+                (*inputToken)++;
+            } else
+            {
+                printf("Error: Expected parameter name\n");
+                freeNodeTree(parameter);
+                freeNodeTree(identifierNode);
+                return NULL;
+            }
+
+            if(parameterList == NULL)
+            {
+                parameterList = parameter;
+            }
+            else
+            {
+                lastParameter->next = parameter;
+                parameter->previous = lastParameter;
+            }
+            lastParameter = parameter;
+
+            if((*inputToken)->type == TOKEN_COMMA)
+            {
+                (*inputToken)++;
+            } else if((*inputToken)->type != TOKEN_RIGHT_ROUND_BRACKET)
+            {
+                printf("Error: Unexpected token in parameter list: %d\n", (*inputToken)->type);
+                freeNodeTree(identifierNode);
+                return NULL;
+            }
+        } else 
+        {
+            printf("Error: Unexpected token in parameter list: %d\n", (*inputToken)->type);
+        }
     }
 
     return identifierNode;

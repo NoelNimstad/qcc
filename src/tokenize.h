@@ -154,6 +154,10 @@ Token *tokenize(char *file)
                 current->type = TOKEN_OPERATOR_ASSIGN;
                 current++;
                 break;
+			case ',':
+				current->type = TOKEN_COMMA;
+				current++;
+				break;
 			case '@':
 				current->type = TOKEN_MODIFIER;
 				character++;
