@@ -1,1 +1,1 @@
-int x = 4; const int y = 6; x = y; int add(); 
+int x = 4; const int y = 6; x = y; const int add(); 

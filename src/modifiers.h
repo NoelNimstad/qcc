@@ -5,6 +5,7 @@ typedef enum
 {
     MODIFIER_NONE    = 0,
     MODIFIER_MUTABLE = 1 << 0,
+    MODIFIER_CONST   = 1 << 1,
 } Modifier;
 
 #endif

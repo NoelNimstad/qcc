@@ -165,6 +165,16 @@ Node *generateNodeAtPosition(Node *position, Token **inputToken, Node *previous)
             currentModifiers |= MODIFIER_MUTABLE;
             (*inputToken)++;
             currentToken = *inputToken;
+        } else if(strcmp(currentToken->value.string_value, "constant"))
+        {
+            currentModifiers |= MODIFIER_CONST;
+            (*inputToken)++;
+            currentToken = *inputToken;
+        } else if(strcmp(currentToken->value.string_value, "const"))
+        {
+            currentModifiers |= MODIFIER_CONST;
+            (*inputToken)++;
+            currentToken = *inputToken;
         }
     }
 
@@ -336,6 +346,11 @@ Node *parseFunctionDeclaration(Token **inputToken)
     (*inputToken)++;
     while((*inputToken)->type != TOKEN_RIGHT_ROUND_BRACKET)
     {
+        if((*inputToken)->type == TOKEN_MODIFIER)
+        {
+            currentModifiers |= (*inputToken)->value.int_value;
+        }
+
         if(tokenIsType(inputToken))
         {
             Node *parameter = (Node *)malloc(sizeof(Node));
@@ -361,7 +376,9 @@ Node *parseFunctionDeclaration(Token **inputToken)
                 parameter->right->right = NULL;
                 parameter->right->previous = NULL;
                 parameter->right->next = NULL;
-                parameter->right->modifiers = MODIFIER_NONE;
+                parameter->right->modifiers = currentModifiers;
+
+                printf("%d\n", parameter->right->modifiers);
 
                 parameter->value.string_value = strdup(currentToken->value.string_value);
                 (*inputToken)++;

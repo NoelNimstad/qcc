@@ -97,11 +97,12 @@ char *parseNode(Node *node)
         case NODE_FUNCTION_DECLARATION:
         {
             char *typeString = nodeTypeToString(node->left);
+            unsigned char constant = (node->modifiers & MODIFIER_CONST) == 0;
             char *identifierString = parseNode(node->right);
 
-            size_t resultSize = strlen(typeString) + strlen(identifierString) + 4;
+            size_t resultSize = strlen(typeString) + strlen(identifierString) + 4 + (constant ? 6 : 0);
             char *result = (char *)malloc(resultSize);
-            snprintf(result, resultSize, "%s %s()", typeString, identifierString);
+            snprintf(result, resultSize, "%s%s %s()", (constant ? "const ": ""), typeString, identifierString);
 
             return result;
         }
