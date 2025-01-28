@@ -164,7 +164,6 @@ void freeNodeTree(Node *node);
 unsigned int currentModifiers;
 Node *generateNodeAtPosition(Node *position, Token **inputToken, Node *previous)
 {
-    Token *currentToken = *inputToken;
     Node *currentNode = newEmptyNode();
 
     position = currentNode;
@@ -174,15 +173,14 @@ Node *generateNodeAtPosition(Node *position, Token **inputToken, Node *previous)
         previous->next = currentNode;
     }
 
-    while(currentToken->type == TOKEN_MODIFIER)
+    while((*inputToken)->type == TOKEN_MODIFIER)
     {
         currentModifiers |= getModifierValueFromTokenString(inputToken);
         printf("m%d\n", currentModifiers);
         (*inputToken)++;
-        currentToken = *inputToken;
     }
 
-    switch(currentToken->type)
+    switch((*inputToken)->type)
     {
         case TOKEN_TYPE_INT:
         case TOKEN_TYPE_FLOAT:
@@ -199,9 +197,9 @@ Node *generateNodeAtPosition(Node *position, Token **inputToken, Node *previous)
         case TOKEN_TYPE_double128:
             currentNode->left = (Node *)malloc(sizeof(Node));
             currentNode->left->type = convertTokenTypeToNodeType(inputToken);
-            (*inputToken)++; currentToken = (*inputToken); // consume token
+            (*inputToken)++;
 
-            if(currentToken->type == TOKEN_IDENTIFIER)
+            if((*inputToken)->type == TOKEN_IDENTIFIER)
             {
                 (*inputToken)++;
                 if((*inputToken)->type == TOKEN_LEFT_ROUND_BRACKET)
@@ -226,15 +224,15 @@ Node *generateNodeAtPosition(Node *position, Token **inputToken, Node *previous)
             return currentNode;
         case TOKEN_VALUE_INT:
             currentNode->type = NODE_VALUE_INT;
-            currentNode->value.int_value = currentToken->value.int_value;
+            currentNode->value.int_value = (*inputToken)->value.int_value;
             break;
         case TOKEN_VALUE_FLOAT:
             currentNode->type = NODE_VALUE_FLOAT;
-            currentNode->value.float_value = currentToken->value.float_value;
+            currentNode->value.float_value = (*inputToken)->value.float_value;
             break;
         case TOKEN_IDENTIFIER:
             currentNode->type = NODE_IDENTIFIER;
-            currentNode->value.string_value = strdup(currentToken->value.string_value);
+            currentNode->value.string_value = strdup((*inputToken)->value.string_value);
             break;
         case TOKEN_OPERATOR_ASSIGN:
             currentNode->type = NODE_OPERATOR_ASSIGN;
@@ -247,10 +245,10 @@ Node *generateNodeAtPosition(Node *position, Token **inputToken, Node *previous)
         case TOKEN_OPERATOR_MINUS:
         case TOKEN_OPERATOR_MULTIPLY:
         case TOKEN_OPERATOR_DIVIDE:
-            currentNode->type = (currentToken->type == TOKEN_OPERATOR_PLUS)     ? NODE_OPERATOR_PLUS     :
-                                (currentToken->type == TOKEN_OPERATOR_MINUS)    ? NODE_OPERATOR_MINUS    :
-                                (currentToken->type == TOKEN_OPERATOR_MULTIPLY) ? NODE_OPERATOR_MULTIPLY :
-                                                                                  NODE_OPERATOR_DIVIDE;
+            currentNode->type = ((*inputToken)->type == TOKEN_OPERATOR_PLUS)     ? NODE_OPERATOR_PLUS     :
+                                ((*inputToken)->type == TOKEN_OPERATOR_MINUS)    ? NODE_OPERATOR_MINUS    :
+                                ((*inputToken)->type == TOKEN_OPERATOR_MULTIPLY) ? NODE_OPERATOR_MULTIPLY :
+                                                                                   NODE_OPERATOR_DIVIDE;
 
             movePreviousToLeft(currentNode);
             (*inputToken)++;
@@ -275,7 +273,7 @@ Node *generateNodeAtPosition(Node *position, Token **inputToken, Node *previous)
             currentNode->type = NODE_OPERATOR_SEMI_COLON;
             break;
         default:
-            printf("Unexpected token type: %d\n", currentToken->type);
+            printf("Unexpected token type: %d\n", (*inputToken)->type);
             currentNode->type = NODE_ERROR;
             break;
     }
@@ -285,9 +283,7 @@ Node *generateNodeAtPosition(Node *position, Token **inputToken, Node *previous)
 
 Node *parseVariableDeclaration(Token **inputToken)
 {
-    Token *currentToken = *inputToken;
-
-    if(currentToken->type != TOKEN_IDENTIFIER)
+    if((*inputToken)->type != TOKEN_IDENTIFIER)
     {
         printf("Error: Expected variable identifier after type\n");
         return NULL;
@@ -295,7 +291,7 @@ Node *parseVariableDeclaration(Token **inputToken)
 
     Node *identifierNode = newEmptyNode();
     identifierNode->type = NODE_IDENTIFIER;
-    identifierNode->value.string_value = strdup(currentToken->value.string_value);
+    identifierNode->value.string_value = strdup((*inputToken)->value.string_value);
 
     (*inputToken)++;
 
@@ -316,9 +312,7 @@ Node *parseVariableDeclaration(Token **inputToken)
 
 Node *parseFunctionDeclaration(Token **inputToken)
 {
-    Token *currentToken = *inputToken;
-
-    if(currentToken->type != TOKEN_IDENTIFIER)
+    if((*inputToken)->type != TOKEN_IDENTIFIER)
     {
         printf("Error: Expected function name after type\n");
         return NULL;
@@ -326,7 +320,7 @@ Node *parseFunctionDeclaration(Token **inputToken)
 
     Node *identifierNode = newEmptyNode();
     identifierNode->type = NODE_IDENTIFIER;
-    identifierNode->value.string_value = strdup(currentToken->value.string_value);
+    identifierNode->value.string_value = strdup((*inputToken)->value.string_value);
 
     (*inputToken)++;
     if((*inputToken)->type != TOKEN_LEFT_ROUND_BRACKET)
@@ -362,13 +356,12 @@ Node *parseFunctionDeclaration(Token **inputToken)
             parameter->left->right = NULL;
 
             (*inputToken)++;
-
-            if(currentToken->type == TOKEN_IDENTIFIER)
+            if((*inputToken)->type == TOKEN_IDENTIFIER)
             {
                 parameter->right = newEmptyNode();
                 parameter->right->type = NODE_IDENTIFIER;
 
-                parameter->value.string_value = strdup(currentToken->value.string_value);
+                parameter->value.string_value = strdup((*inputToken)->value.string_value);
                 (*inputToken)++;
             } else
             {
@@ -409,19 +402,16 @@ Node *parseFunctionDeclaration(Token **inputToken)
 
 Node *parseExpression(Token **inputToken)
 {
-    Token *currentToken = *inputToken;
     Node *leftNode = generateNodeAtPosition(NULL, inputToken, NULL);
 
-    while(currentToken->type == TOKEN_OPERATOR_PLUS     ||
-          currentToken->type == TOKEN_OPERATOR_MINUS    ||
-          currentToken->type == TOKEN_OPERATOR_MULTIPLY ||
-          currentToken->type == TOKEN_OPERATOR_DIVIDE)
+    while((*inputToken)->type == TOKEN_OPERATOR_PLUS     ||
+          (*inputToken)->type == TOKEN_OPERATOR_MINUS    ||
+          (*inputToken)->type == TOKEN_OPERATOR_MULTIPLY ||
+          (*inputToken)->type == TOKEN_OPERATOR_DIVIDE)
     {
         Node *operatorNode = generateNodeAtPosition(NULL, inputToken, leftNode);
         operatorNode->left = leftNode;
         leftNode = operatorNode;
-
-        currentToken = *inputToken;
     }
 
     return leftNode;
