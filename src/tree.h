@@ -137,8 +137,7 @@ unsigned int getModifierValueFromTokenString(Token **inputToken)
     } else if(strcmp((*inputToken)->value.string_value, "const")
            || strcmp((*inputToken)->value.string_value, "constant"))
     {
-        printf("banana\n");
-        return 1;
+        return MODIFIER_CONST;
     }
 
     return MODIFIER_NONE;
@@ -433,7 +432,7 @@ Node *generateNodeTree(Token *tokens)
 	Node *head = newEmptyNode();
 	head->type = NODE_HEAD;
 	Node *currentNode = head;
-    
+
 	for (Token *currentToken = tokens; currentToken->type != TOKEN_END_OF_FILE;)
 	{
 		if(currentToken->type == TOKEN_ERROR)
