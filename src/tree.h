@@ -144,6 +144,19 @@ unsigned int getModifierValueFromTokenString(Token **inputToken)
     return MODIFIER_NONE;
 }
 
+Node *newEmptyNode()
+{
+    Node *node = (Node *)malloc(sizeof(Node));
+    node->type = NODE_ERROR;
+    node->left = NULL;
+    node->right = NULL;
+    node->previous = NULL;
+    node->next = NULL;
+    node->modifiers = MODIFIER_NONE;
+
+    return node;
+}
+
 Node *parseExpression(Token **inputToken);
 Node *parseVariableDeclaration(Token **inputToken);
 Node *parseFunctionDeclaration(Token **inputToken);
@@ -153,14 +166,7 @@ unsigned int currentModifiers;
 Node *generateNodeAtPosition(Node *position, Token **inputToken, Node *previous)
 {
     Token *currentToken = *inputToken;
-
-    Node *currentNode = (Node *)malloc(sizeof(Node));
-    currentNode->type = NODE_ERROR;
-    currentNode->left = NULL;
-    currentNode->right = NULL;
-    currentNode->previous = NULL;
-    currentNode->next = NULL;
-    currentNode->modifiers = MODIFIER_NONE;
+    Node *currentNode = newEmptyNode();
 
     position = currentNode;
     if(previous != NULL)
@@ -288,13 +294,8 @@ Node *parseVariableDeclaration(Token **inputToken)
         return NULL;
     }
 
-    Node *identifierNode = (Node *)malloc(sizeof(Node));
+    Node *identifierNode = newEmptyNode();
     identifierNode->type = NODE_IDENTIFIER;
-    identifierNode->left = NULL;
-    identifierNode->right = NULL;
-    identifierNode->previous = NULL;
-    identifierNode->next = NULL;
-    identifierNode->modifiers = MODIFIER_NONE;
     identifierNode->value.string_value = strdup(currentToken->value.string_value);
 
     (*inputToken)++;
@@ -324,13 +325,8 @@ Node *parseFunctionDeclaration(Token **inputToken)
         return NULL;
     }
 
-    Node *identifierNode = (Node *)malloc(sizeof(Node));
+    Node *identifierNode = newEmptyNode();
     identifierNode->type = NODE_IDENTIFIER;
-    identifierNode->left = NULL;
-    identifierNode->right = NULL;
-    identifierNode->previous = NULL;
-    identifierNode->next = NULL;
-    identifierNode->modifiers = MODIFIER_NONE;
     identifierNode->value.string_value = strdup(currentToken->value.string_value);
 
     (*inputToken)++;
@@ -355,12 +351,8 @@ Node *parseFunctionDeclaration(Token **inputToken)
 
         if(tokenIsType(inputToken))
         {
-            Node *parameter = (Node *)malloc(sizeof(Node));
+            Node *parameter = newEmptyNode();
             parameter->type = NODE_FUNCTION_PARAMETER;
-            parameter->left = NULL;
-            parameter->right = NULL;
-            parameter->previous = NULL;
-            parameter->next = NULL;
             printf("%d\n", currentModifiers);
             parameter->modifiers = currentModifiers;
             currentModifiers = MODIFIER_NONE;
@@ -374,12 +366,8 @@ Node *parseFunctionDeclaration(Token **inputToken)
 
             if(currentToken->type == TOKEN_IDENTIFIER)
             {
-                parameter->right = (Node *)malloc(sizeof(Node));
+                parameter->right = newEmptyNode();
                 parameter->right->type = NODE_IDENTIFIER;
-                parameter->right->left = NULL;
-                parameter->right->right = NULL;
-                parameter->right->previous = NULL;
-                parameter->right->next = NULL;
 
                 parameter->value.string_value = strdup(currentToken->value.string_value);
                 (*inputToken)++;
@@ -442,16 +430,10 @@ Node *parseExpression(Token **inputToken)
 
 Node *generateNodeTree(Token *tokens)
 {
-	Node *head = (Node *)malloc(sizeof(Node));
+	Node *head = newEmptyNode();
 	head->type = NODE_HEAD;
-
 	Node *currentNode = head;
-	currentNode->left = NULL;
-	currentNode->right = NULL;
-	currentNode->previous = NULL;
-	currentNode->next = NULL;
-    currentNode->modifiers = MODIFIER_NONE;
-
+    
 	for (Token *currentToken = tokens; currentToken->type != TOKEN_END_OF_FILE;)
 	{
 		if(currentToken->type == TOKEN_ERROR)
