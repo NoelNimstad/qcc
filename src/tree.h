@@ -128,6 +128,22 @@ NodeType convertTokenTypeToNodeType(Token **inputToken)
     return nodeType;
 }
 
+unsigned int getModifierValueFromTokenString(Token **inputToken)
+{
+    if(strcmp((*inputToken)->value.string_value, "mut")
+    || strcmp((*inputToken)->value.string_value, "mutable"))
+    {
+        return MODIFIER_MUTABLE;
+    } else if(strcmp((*inputToken)->value.string_value, "const")
+           || strcmp((*inputToken)->value.string_value, "constant"))
+    {
+        printf("banana\n");
+        return 1;
+    }
+
+    return MODIFIER_NONE;
+}
+
 Node *parseExpression(Token **inputToken);
 Node *parseVariableDeclaration(Token **inputToken);
 Node *parseFunctionDeclaration(Token **inputToken);
@@ -155,27 +171,10 @@ Node *generateNodeAtPosition(Node *position, Token **inputToken, Node *previous)
 
     while(currentToken->type == TOKEN_MODIFIER)
     {
-        if(strcmp(currentToken->value.string_value, "mutable"))
-        {
-            currentModifiers |= MODIFIER_MUTABLE;
-            (*inputToken)++;
-            currentToken = *inputToken;
-        } else if(strcmp(currentToken->value.string_value, "mut"))
-        {
-            currentModifiers |= MODIFIER_MUTABLE;
-            (*inputToken)++;
-            currentToken = *inputToken;
-        } else if(strcmp(currentToken->value.string_value, "constant"))
-        {
-            currentModifiers |= MODIFIER_CONST;
-            (*inputToken)++;
-            currentToken = *inputToken;
-        } else if(strcmp(currentToken->value.string_value, "const"))
-        {
-            currentModifiers |= MODIFIER_CONST;
-            (*inputToken)++;
-            currentToken = *inputToken;
-        }
+        currentModifiers |= getModifierValueFromTokenString(inputToken);
+        printf("m%d\n", currentModifiers);
+        (*inputToken)++;
+        currentToken = *inputToken;
     }
 
     switch(currentToken->type)
@@ -348,7 +347,10 @@ Node *parseFunctionDeclaration(Token **inputToken)
     {
         if((*inputToken)->type == TOKEN_MODIFIER)
         {
-            currentModifiers |= (*inputToken)->value.int_value;
+            currentModifiers |= getModifierValueFromTokenString(inputToken);
+            printf("%d\n", getModifierValueFromTokenString(inputToken));
+            (*inputToken)++;
+            continue;
         }
 
         if(tokenIsType(inputToken))
@@ -359,7 +361,9 @@ Node *parseFunctionDeclaration(Token **inputToken)
             parameter->right = NULL;
             parameter->previous = NULL;
             parameter->next = NULL;
-            parameter->modifiers = MODIFIER_NONE;
+            printf("%d\n", currentModifiers);
+            parameter->modifiers = currentModifiers;
+            currentModifiers = MODIFIER_NONE;
 
             parameter->left = (Node *)malloc(sizeof(Node));
             parameter->left->type = convertTokenTypeToNodeType(inputToken);
@@ -368,7 +372,7 @@ Node *parseFunctionDeclaration(Token **inputToken)
 
             (*inputToken)++;
 
-            if (currentToken->type == TOKEN_IDENTIFIER)
+            if(currentToken->type == TOKEN_IDENTIFIER)
             {
                 parameter->right = (Node *)malloc(sizeof(Node));
                 parameter->right->type = NODE_IDENTIFIER;
@@ -376,9 +380,6 @@ Node *parseFunctionDeclaration(Token **inputToken)
                 parameter->right->right = NULL;
                 parameter->right->previous = NULL;
                 parameter->right->next = NULL;
-                parameter->right->modifiers = currentModifiers;
-
-                printf("%d\n", parameter->right->modifiers);
 
                 parameter->value.string_value = strdup(currentToken->value.string_value);
                 (*inputToken)++;
