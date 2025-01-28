@@ -4,53 +4,53 @@
 typedef enum
 {
 	// types
-	TOKEN_TYPE_uint8,
-	TOKEN_TYPE_sint8,
-	TOKEN_TYPE_uint16,
-	TOKEN_TYPE_sint16,
-	TOKEN_TYPE_uint32,
-	TOKEN_TYPE_sint32,
-	TOKEN_TYPE_uint64,
-	TOKEN_TYPE_sint64,
-	TOKEN_TYPE_INT,
-	TOKEN_TYPE_FLOAT,
-	TOKEN_TYPE_double64,
-	TOKEN_TYPE_double128,
-	TOKEN_TYPE_DOUBLE,
-	TOKEN_TYPE_STRING,
-	TOKEN_TYPE_VOID,
+	TOKEN_TYPE_uint8,     // 1 byte unsigned integer
+	TOKEN_TYPE_sint8,     // 1 byte signed integer
+	TOKEN_TYPE_uint16,    // 2 byte unsigned integer
+	TOKEN_TYPE_sint16,    // 2 byte signed integer
+	TOKEN_TYPE_uint32,    // 4 byte unsigned integer
+	TOKEN_TYPE_sint32,    // 4 byte signed integer
+	TOKEN_TYPE_uint64,    // 8 byte unsigned integer
+	TOKEN_TYPE_sint64,    // 8 byte signed integer
+	TOKEN_TYPE_INT,       // integer (4 or 8 bytes)
+	TOKEN_TYPE_FLOAT,     // floating point number
+	TOKEN_TYPE_double64,  // 8 byte double
+	TOKEN_TYPE_double128, // 16 byte double
+	TOKEN_TYPE_DOUBLE,    // double (8 byte double)
+	TOKEN_TYPE_STRING,    // TBD
+	TOKEN_TYPE_VOID,      // void
 
 	// values
-	TOKEN_VALUE_INT,
-	TOKEN_VALUE_FLOAT,
-	TOKEN_VALUE_DOUBLE,
+	TOKEN_VALUE_INT,    // integer value
+	TOKEN_VALUE_FLOAT,  // floating point value
+	TOKEN_VALUE_DOUBLE, // double value
 
 	// variables
-	TOKEN_IDENTIFIER,
+	TOKEN_IDENTIFIER, // identifier name
 
 	// brackets
-	TOKEN_LEFT_ROUND_BRACKET,
-	TOKEN_RIGHT_ROUND_BRACKET,
-	TOKEN_LEFT_CURLY_BRACKET,
-	TOKEN_RIGHT_CURLY_BRACKET,
+	TOKEN_LEFT_ROUND_BRACKET,  // (
+	TOKEN_RIGHT_ROUND_BRACKET, // )
+	TOKEN_LEFT_CURLY_BRACKET,  // {
+	TOKEN_RIGHT_CURLY_BRACKET, // }
 
 	// operators
-	TOKEN_OPERATOR_SEMI_COLON,
-	TOKEN_OPERATOR_PLUS,
-	TOKEN_OPERATOR_MINUS,
-	TOKEN_OPERATOR_MULTIPLY,
-	TOKEN_OPERATOR_DIVIDE,
-	TOKEN_OPERATOR_ASSIGN,
+	TOKEN_OPERATOR_SEMI_COLON, // ;
+	TOKEN_OPERATOR_PLUS,       // +
+	TOKEN_OPERATOR_MINUS,      // -
+	TOKEN_OPERATOR_MULTIPLY,   // *
+	TOKEN_OPERATOR_DIVIDE,     // /
+	TOKEN_OPERATOR_ASSIGN,     // =
 
 	// keywords
-	TOKEN_RETURN,
+	TOKEN_RETURN, // return keyword
 
 	// miscelanious
-	TOKEN_ERROR,
-	TOKEN_NEW_LINE,
-	TOKEN_END_OF_FILE,
-	TOKEN_COMMA,
-	TOKEN_MODIFIER
+	TOKEN_ERROR,       // error token, default
+	TOKEN_NEW_LINE,    // \n
+	TOKEN_END_OF_FILE, // for the end of a file
+	TOKEN_COMMA,       // ,
+	TOKEN_MODIFIER     // modifier token, like mutable
 } TokenType;
 
 typedef struct
