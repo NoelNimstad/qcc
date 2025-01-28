@@ -1,3 +1,9 @@
+/**
+ * @brief The QCC (Queue-lang Compiler Collection) compiler
+ * @version 0.0.1a
+ * @date 2025-01-25
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 
