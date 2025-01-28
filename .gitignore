@@ -3,3 +3,4 @@ syntax.c
 syntax.txt
 build/
 .vscode/
+compile.bat

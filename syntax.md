@@ -32,11 +32,11 @@ C integer types are a mess, integer types are now labeled `u` or `s` for `unsign
 			 \             /\
 		      \           /  \
 		       \         /    \
-	            3     (Node)   5  -> (Node)
+	            3     (Node)   1  -> (Node)
 	                    /\              \
 					   /  \              \
 					  /    \              \
-					 1      4 -> (Node)    9 
+					 1      4 -> (Node)    5 
 					                /
 								   /  
 							      /    
