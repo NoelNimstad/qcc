@@ -166,7 +166,7 @@ Token *tokenize(char *file)
 				int i = 0;
 				while(isalnum(*character))
 				{
-					buffer[i++] = *(character+1);
+					buffer[i++] = *character;
 					character++;
 				}
 				buffer[i] = '\0';

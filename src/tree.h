@@ -130,12 +130,12 @@ NodeType convertTokenTypeToNodeType(Token **inputToken)
 
 unsigned int getModifierValueFromTokenString(Token **inputToken)
 {
-    if(strcmp((*inputToken)->value.string_value, "mut")
-    || strcmp((*inputToken)->value.string_value, "mutable"))
+    if(strcmp((*inputToken)->value.string_value, "mut")     == 0
+    || strcmp((*inputToken)->value.string_value, "mutable") == 0)
     {
         return MODIFIER_MUTABLE;
-    } else if(strcmp((*inputToken)->value.string_value, "const")
-           || strcmp((*inputToken)->value.string_value, "constant"))
+    } else if(strcmp((*inputToken)->value.string_value, "const")    == 0
+           || strcmp((*inputToken)->value.string_value, "constant") == 0)
     {
         return MODIFIER_CONST;
     }
@@ -175,8 +175,9 @@ Node *generateNodeAtPosition(Node *position, Token **inputToken, Node *previous)
 
     while((*inputToken)->type == TOKEN_MODIFIER)
     {
+        printf("%s\n", (*inputToken)->value.string_value);
         currentModifiers |= getModifierValueFromTokenString(inputToken);
-        printf("m%d\n", currentModifiers);
+        printf("m%d\n", getModifierValueFromTokenString(inputToken));
         (*inputToken)++;
     }
 
