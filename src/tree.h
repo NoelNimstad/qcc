@@ -130,14 +130,13 @@ NodeType convertTokenTypeToNodeType(Token **inputToken)
 
 unsigned int getModifierValueFromTokenString(Token **inputToken)
 {
-    if(strcmp((*inputToken)->value.string_value, "mut")     == 0
-    || strcmp((*inputToken)->value.string_value, "mutable") == 0)
+    const char *tokenStr = (*inputToken)->value.string_value;
+    for(int i = 0; modifierTable[i].name != NULL; i++)
     {
-        return MODIFIER_MUTABLE;
-    } else if(strcmp((*inputToken)->value.string_value, "const")    == 0
-           || strcmp((*inputToken)->value.string_value, "constant") == 0)
-    {
-        return MODIFIER_CONST;
+        if(strcmp(tokenStr, modifierTable[i].name) == 0)
+        {
+            return modifierTable[i].value;
+        }
     }
 
     return MODIFIER_NONE;

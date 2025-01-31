@@ -97,7 +97,7 @@ char *parseNode(Node *node)
         case NODE_FUNCTION_DECLARATION:
         {
             char *typeString = nodeTypeToString(node->left);
-            unsigned char constant = (node->modifiers & MODIFIER_CONST) == 0;
+            unsigned char constant = (node->modifiers & MODIFIER_CONST) != 0; // for modifiers @const / @constant
             char *identifierString = parseNode(node->right);
 
             size_t resultSize = strlen(typeString) + strlen(identifierString) + 4 + (constant ? 6 : 0);

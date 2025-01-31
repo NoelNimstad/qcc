@@ -8,4 +8,16 @@ typedef enum
     MODIFIER_CONST   = 1 << 1, // enforces const (on things like functions)
 } Modifier;
 
+struct 
+{
+    const char *name;
+    Modifier value;
+} modifierTable[] = 
+{
+    { "mut", MODIFIER_MUTABLE },
+    { "mutable", MODIFIER_MUTABLE },
+    { "const", MODIFIER_CONST },
+    { "constant", MODIFIER_CONST }
+};
+
 #endif
