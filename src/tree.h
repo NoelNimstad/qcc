@@ -146,12 +146,6 @@ unsigned int getModifierValueFromTokenString(Token **inputToken)
 Node *newEmptyNode()
 {
     Node *node = (Node *)malloc(sizeof(Node));
-    if(node == NULL)
-    {
-        printf("Error: Failed to allocate memory for new node\n");
-        return NULL;
-    }
-
     node->type = NODE_ERROR;
     node->left = NULL;
     node->right = NULL;
