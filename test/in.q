@@ -1,6 +1,4 @@
-int main()
+int banana(int apple, int oranges)
 {
-    @mut int x = 51;
-    int y = 3 + 1;
-    x = y + 1;
+    int x = apple + oranges;
 }

@@ -1,6 +1,1 @@
-int main(void)
-{
-    int x = 51;
-    const int y = 3 + 1;
-    x = y + 1;
-};
+int banana(int apple, const int oranges){ const int x = apple + oranges; }; 

@@ -108,11 +108,13 @@ char *parseNode(Node *node)
                 args = (char *)realloc(args, 0);
                 while(current != NULL)
                 {
+                    unsigned char mutable = (current->modifiers & MODIFIER_MUTABLE) != 0;
                     char *argTypeString = nodeTypeToString(current->left);
                     char *argIdentifierString = strdup(current->right->value.string_value);
-                    size_t argsStringSize = strlen(args) + strlen(argTypeString) + strlen(argIdentifierString) + 3; // (existing)_TYPE_IDENTIFIER
+                    size_t argsStringSize = strlen(args) + strlen(argTypeString) + strlen(argIdentifierString) + 3 + (mutable ? 0 : 6); // (existing)_TYPE_IDENTIFIER
                     args = (char *)realloc(args, argsStringSize);
 
+                    if(!mutable) strcat(args, "const ");
                     strcat(args, argTypeString);
                     strcat(args, " ");
                     strcat(args, argIdentifierString);
