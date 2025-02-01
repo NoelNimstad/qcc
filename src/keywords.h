@@ -27,7 +27,7 @@ Keyword keywordTable[] =
     { "double64", TOKEN_TYPE_double64 },
     { "double128", TOKEN_TYPE_double128 },
     { "void", TOKEN_TYPE_VOID },
-    { "return", TOKEN_RETURN },
+    { "return", TOKEN_RETURN }
 };
 
 #endif // KEYWORDS_H

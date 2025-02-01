@@ -100,9 +100,41 @@ char *parseNode(Node *node)
             unsigned char constant = (node->modifiers & MODIFIER_CONST) != 0; // for modifiers @const / @constant
             char *identifierString = parseNode(node->right);
 
-            size_t resultSize = strlen(typeString) + strlen(identifierString) + 4 + (constant ? 6 : 0);
+            char *args = strdup("void");
+            unsigned char hasArguments = node->right->left != NULL;
+            Node *current = node->right->left;
+            if(hasArguments)
+            {
+                args = (char *)realloc(args, 0);
+                while(current != NULL)
+                {
+                    char *argTypeString = nodeTypeToString(current->left);
+                    char *argIdentifierString = strdup(current->right->value.string_value);
+                    size_t argsStringSize = strlen(args) + strlen(argTypeString) + strlen(argIdentifierString) + 3; // (existing)_TYPE_IDENTIFIER
+                    args = (char *)realloc(args, argsStringSize);
+
+                    strcat(args, argTypeString);
+                    strcat(args, " ");
+                    strcat(args, argIdentifierString);
+
+                    if(current->next != NULL) strcat(args, ", ");
+                    free(argIdentifierString);
+
+                    current = current->next;
+                }
+            }
+
+            unsigned char hasBody = node->right->right != NULL;
+            char *bodyString;
+            if(hasBody)
+            {
+                bodyString = parseNode(node->right->right);
+            }
+
+            size_t resultSize = strlen(typeString) + strlen(identifierString) + 5 + (constant ? 6 : 0) + strlen(args) + (hasBody ? strlen(bodyString) : 0);
             char *result = (char *)malloc(resultSize);
-            snprintf(result, resultSize, "%s%s %s()", (constant ? "const ": ""), typeString, identifierString);
+
+            snprintf(result, resultSize, "%s%s %s(%s)%s", (constant ? "const ": ""), typeString, identifierString, args, (hasBody ? bodyString : ""));
 
             return result;
         }
@@ -172,8 +204,27 @@ char *parseNode(Node *node)
 		{
 			return strdup("\n");
 		}
+        case NODE_SCOPE:
+        {
+            char *result = strdup("{ ");
+
+            Node *current = node->left;
+            while (current != NULL)
+            {
+                char *stmtString = parseNode(current);
+                result = realloc(result, strlen(result) + strlen(stmtString) + 1);
+                strcat(result, stmtString);
+                free(stmtString);
+                current = current->next;
+            }
+
+            result = realloc(result, strlen(result) + 3);
+            strcat(result, "}; ");
+            return result;
+        }
         default:
         {
+            printf("UNEXPECTED NODE: %d\n", node->type);
             return strdup("/*error*/");
         }
     }

@@ -45,6 +45,9 @@ typedef enum
     NODE_FUNCTION_DECLARATION,
     NODE_FUNCTION_PARAMETER,
 
+    // scope
+    NODE_SCOPE,
+
 	// miscelanious
 	NODE_HEAD,
 	NODE_END_OF_FILE,
@@ -105,6 +108,7 @@ unsigned char tokenIsType(Token **inputToken)
                             ((*inputToken)->type == TOKEN_TYPE_DOUBLE)    ? 1 :
                             ((*inputToken)->type == TOKEN_TYPE_double64)  ? 1 :
                             ((*inputToken)->type == TOKEN_TYPE_double128) ? 1 :
+                            ((*inputToken)->type == TOKEN_TYPE_VOID)      ? 1 :
                                                                             0);
 
     return isType;
@@ -125,6 +129,7 @@ NodeType convertTokenTypeToNodeType(Token **inputToken)
                          ((*inputToken)->type == TOKEN_TYPE_DOUBLE)    ? NODE_TYPE_DOUBLE    :
                          ((*inputToken)->type == TOKEN_TYPE_double64)  ? NODE_TYPE_double64  :
                          ((*inputToken)->type == TOKEN_TYPE_double128) ? NODE_TYPE_double128 :
+                         ((*inputToken)->type == TOKEN_TYPE_VOID)      ? NODE_TYPE_VOID      :
                                                                          NODE_ERROR);
 
     return nodeType;
@@ -156,6 +161,7 @@ Node *newEmptyNode()
 Node *parseExpression(Token **inputToken);
 Node *parseVariableDeclaration(Token **inputToken);
 Node *parseFunctionDeclaration(Token **inputToken);
+Node *parseScope(Token **inputToken);
 void freeNodeTree(Node *node);
 
 unsigned int currentModifiers;
@@ -193,6 +199,7 @@ Node *generateNodeAtPosition(Node *position, Token **inputToken, Node *previous)
         case TOKEN_TYPE_sint64:
         case TOKEN_TYPE_double64:
         case TOKEN_TYPE_double128:
+        case TOKEN_TYPE_VOID:
             currentNode->left = (Node *)malloc(sizeof(Node));
             currentNode->left->type = convertTokenTypeToNodeType(inputToken);
             (*inputToken)++;
@@ -269,6 +276,12 @@ Node *generateNodeAtPosition(Node *position, Token **inputToken, Node *previous)
             break;
         case TOKEN_OPERATOR_SEMI_COLON:
             currentNode->type = NODE_OPERATOR_SEMI_COLON;
+            break;
+        case TOKEN_LEFT_CURLY_BRACKET:
+            (*inputToken)++;
+            currentNode->type = NODE_SCOPE;
+            currentNode->left = parseScope(inputToken);
+            printf("guh?\n");
             break;
         default:
             fprintf(stderr, "Unexpected token type: %d\n", (*inputToken)->type);
@@ -355,16 +368,14 @@ Node *parseFunctionDeclaration(Token **inputToken)
 
             parameter->left = (Node *)malloc(sizeof(Node));
             parameter->left->type = convertTokenTypeToNodeType(inputToken);
-            parameter->left->left = NULL;
-            parameter->left->right = NULL;
 
             (*inputToken)++;
             if((*inputToken)->type == TOKEN_IDENTIFIER)
             {
                 parameter->right = newEmptyNode();
                 parameter->right->type = NODE_IDENTIFIER;
+                parameter->right->value.string_value = strdup((*inputToken)->value.string_value);
 
-                parameter->value.string_value = strdup((*inputToken)->value.string_value);
                 (*inputToken)++;
             } else
             {
@@ -400,6 +411,20 @@ Node *parseFunctionDeclaration(Token **inputToken)
         }
     }
 
+    identifierNode->left = parameterList;
+
+    (*inputToken)++;
+    if((*inputToken)->type == TOKEN_LEFT_CURLY_BRACKET) // function declaration with body
+    {
+        (*inputToken)++;
+        identifierNode->right = newEmptyNode();
+        identifierNode->right->type = NODE_SCOPE;
+        identifierNode->right->left = parseScope(inputToken);
+    } else 
+    {
+        (*inputToken)--;
+    }
+
     return identifierNode;
 }
 
@@ -418,6 +443,35 @@ Node *parseExpression(Token **inputToken)
     }
 
     return leftNode;
+}
+
+Node *parseScope(Token **inputToken)
+{
+    Node *statementList = NULL;
+    Node *lastStatement = NULL;
+    while((*inputToken)->type != TOKEN_RIGHT_CURLY_BRACKET)
+    {
+        if((*inputToken)->type == TOKEN_END_OF_FILE)
+        {
+            (*inputToken)--;
+            fprintf(stderr, "Error: No '}' to close scope found");
+            break;
+        }
+
+        Node *statement = generateNodeAtPosition(NULL, inputToken, NULL);
+        if(statementList == NULL)
+        {
+            statementList = statement;
+        } else 
+        {
+            lastStatement->next = statement;
+            statement->previous = lastStatement;
+        }
+        lastStatement = statement;
+        (*inputToken)++;
+    }
+
+    return statementList;
 }
 
 Node *generateNodeTree(Token *tokens)
