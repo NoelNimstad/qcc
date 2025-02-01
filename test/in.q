@@ -1,5 +1,3 @@
-@mut int x = 4;   // make x mutable
-int y = 6; // y defaults to a constant
-x = y;            // set x to y
-
-int add(int a, @mut int b);
+@mut int x;
+int y = 3;
+x = y + 1;

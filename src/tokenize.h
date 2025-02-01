@@ -150,6 +150,9 @@ Token *tokenize(char *file)
                 current->type = TOKEN_OPERATOR_MINUS;
                 current++;
                 break;
+			case '*':
+				current->type = TOKEN_OPERATOR_STAR;
+				current++;
             case '=':
                 current->type = TOKEN_OPERATOR_ASSIGN;
                 current++;

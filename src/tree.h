@@ -37,6 +37,7 @@ typedef enum
     NODE_OPERATOR_MULTIPLY,
     NODE_OPERATOR_DIVIDE,
     NODE_OPERATOR_SEMI_COLON,
+    NODE_TYPE_POINTER,
 
 	// variables
 	NODE_IDENTIFIER,
@@ -73,7 +74,7 @@ typedef struct Node
 
 void movePreviousToLeft(Node *node)
 {
-    if(!node->previous) return;
+    if(!node || !node->previous) return;
 
 	node->left = node->previous;
 	node->previous = node->previous->previous;
@@ -87,6 +88,7 @@ void movePreviousToLeft(Node *node)
 		node->left->next = NULL;
 	}
 }
+
 
 unsigned char tokenIsType(Token **inputToken)
 {
@@ -144,12 +146,8 @@ unsigned int getModifierValueFromTokenString(Token **inputToken)
 
 Node *newEmptyNode()
 {
-    Node *node = (Node *)malloc(sizeof(Node));
+    Node *node = (Node *)calloc(1, sizeof(Node));
     node->type = NODE_ERROR;
-    node->left = NULL;
-    node->right = NULL;
-    node->previous = NULL;
-    node->next = NULL;
     node->modifiers = MODIFIER_NONE;
 
     return node;
@@ -243,12 +241,12 @@ Node *generateNodeAtPosition(Node *position, Token **inputToken, Node *previous)
             return currentNode;
         case TOKEN_OPERATOR_PLUS:
         case TOKEN_OPERATOR_MINUS:
-        case TOKEN_OPERATOR_MULTIPLY:
+        case TOKEN_OPERATOR_STAR:
         case TOKEN_OPERATOR_DIVIDE:
-            currentNode->type = ((*inputToken)->type == TOKEN_OPERATOR_PLUS)     ? NODE_OPERATOR_PLUS     :
-                                ((*inputToken)->type == TOKEN_OPERATOR_MINUS)    ? NODE_OPERATOR_MINUS    :
-                                ((*inputToken)->type == TOKEN_OPERATOR_MULTIPLY) ? NODE_OPERATOR_MULTIPLY :
-                                                                                   NODE_OPERATOR_DIVIDE;
+            currentNode->type = ((*inputToken)->type == TOKEN_OPERATOR_PLUS)  ? NODE_OPERATOR_PLUS     :
+                                ((*inputToken)->type == TOKEN_OPERATOR_MINUS) ? NODE_OPERATOR_MINUS    :
+                                ((*inputToken)->type == TOKEN_OPERATOR_STAR)  ? NODE_OPERATOR_MULTIPLY :
+                                                                                NODE_OPERATOR_DIVIDE;
 
             movePreviousToLeft(currentNode);
             (*inputToken)++;
@@ -259,7 +257,7 @@ Node *generateNodeAtPosition(Node *position, Token **inputToken, Node *previous)
             currentNode = parseExpression(inputToken);
             if((*inputToken)->type != TOKEN_RIGHT_ROUND_BRACKET)
             {
-                printf("Error: Missing closing parenthesis\n");
+                fprintf(stderr, "Error: Missing closing parenthesis\n");
                 currentNode->type = NODE_ERROR;
             } else
             {
@@ -273,7 +271,7 @@ Node *generateNodeAtPosition(Node *position, Token **inputToken, Node *previous)
             currentNode->type = NODE_OPERATOR_SEMI_COLON;
             break;
         default:
-            printf("Unexpected token type: %d\n", (*inputToken)->type);
+            fprintf(stderr, "Unexpected token type: %d\n", (*inputToken)->type);
             currentNode->type = NODE_ERROR;
             break;
     }
@@ -285,7 +283,7 @@ Node *parseVariableDeclaration(Token **inputToken)
 {
     if((*inputToken)->type != TOKEN_IDENTIFIER)
     {
-        printf("Error: Expected variable identifier after type\n");
+        fprintf(stderr, "Error: Expected variable identifier after type\n");
         return NULL;
     }
 
@@ -294,8 +292,13 @@ Node *parseVariableDeclaration(Token **inputToken)
     identifierNode->value.string_value = strdup((*inputToken)->value.string_value);
 
     (*inputToken)++;
+    if((*inputToken)->type == TOKEN_OPERATOR_SEMI_COLON) // handle pure variable declarations (int x;)
+    {
+        (*inputToken)--;
+        return identifierNode;
+    }
 
-    if((*inputToken)->type == TOKEN_OPERATOR_ASSIGN)
+    if((*inputToken)->type == TOKEN_OPERATOR_ASSIGN) // handle variable declarations with values
     {
         Node *assignNode = (Node *)malloc(sizeof(Node));
         assignNode->type = NODE_OPERATOR_ASSIGN;
@@ -314,7 +317,7 @@ Node *parseFunctionDeclaration(Token **inputToken)
 {
     if((*inputToken)->type != TOKEN_IDENTIFIER)
     {
-        printf("Error: Expected function name after type\n");
+        fprintf(stderr, "Error: Expected function name after type\n");
         return NULL;
     }
 
@@ -325,7 +328,7 @@ Node *parseFunctionDeclaration(Token **inputToken)
     (*inputToken)++;
     if((*inputToken)->type != TOKEN_LEFT_ROUND_BRACKET)
     {
-        printf("Error: Expected '(' after function name\n");
+        fprintf(stderr, "Error: Expected '(' after function name\n");
     }
 
     Node *parameterList = NULL;
@@ -387,13 +390,13 @@ Node *parseFunctionDeclaration(Token **inputToken)
                 (*inputToken)++;
             } else if((*inputToken)->type != TOKEN_RIGHT_ROUND_BRACKET)
             {
-                printf("Error: Unexpected token in parameter list: %d\n", (*inputToken)->type);
+                fprintf(stderr, "Error: Unexpected token in parameter list: %d\n", (*inputToken)->type);
                 freeNodeTree(identifierNode);
                 return NULL;
             }
         } else 
         {
-            printf("Error: Unexpected token in parameter list: %d\n", (*inputToken)->type);
+            fprintf(stderr, "Error: Unexpected token in parameter list: %d\n", (*inputToken)->type);
         }
     }
 
@@ -404,9 +407,9 @@ Node *parseExpression(Token **inputToken)
 {
     Node *leftNode = generateNodeAtPosition(NULL, inputToken, NULL);
 
-    while((*inputToken)->type == TOKEN_OPERATOR_PLUS     ||
-          (*inputToken)->type == TOKEN_OPERATOR_MINUS    ||
-          (*inputToken)->type == TOKEN_OPERATOR_MULTIPLY ||
+    while((*inputToken)->type == TOKEN_OPERATOR_PLUS  ||
+          (*inputToken)->type == TOKEN_OPERATOR_MINUS ||
+          (*inputToken)->type == TOKEN_OPERATOR_STAR  ||
           (*inputToken)->type == TOKEN_OPERATOR_DIVIDE)
     {
         Node *operatorNode = generateNodeAtPosition(NULL, inputToken, leftNode);
