@@ -1,4 +1,9 @@
-int banana(int apple, int oranges)
+int banana(int x, int y)
 {
-    int x = apple + oranges;
+    return x + y;
+}
+
+int main()
+{
+    return banana(-1, 1);
 }

@@ -22,14 +22,6 @@ Token *tokenize(char *file)
 
 	while(*character != '\0')
 	{
-		// if((*character) == '\n')
-		// {
-		// 	current->type = TOKEN_NEW_LINE;
-		// 	character++;
-		// 	current++;
-		// 	continue;
-		// }
-
 		if(isspace(*character))
 		{
 			character++;

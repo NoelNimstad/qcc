@@ -25,6 +25,7 @@ typedef enum
 	NODE_TYPE_DOUBLE,
 	NODE_TYPE_STRING,
 	NODE_TYPE_VOID,
+    NODE_TYPE_POINTER,
 
 	// values
 	NODE_VALUE_INT,
@@ -37,13 +38,13 @@ typedef enum
     NODE_OPERATOR_MULTIPLY,
     NODE_OPERATOR_DIVIDE,
     NODE_OPERATOR_SEMI_COLON,
-    NODE_TYPE_POINTER,
 
 	// variables
 	NODE_IDENTIFIER,
     NODE_VARIABLE_DECLARATION,
     NODE_FUNCTION_DECLARATION,
     NODE_FUNCTION_PARAMETER,
+    NODE_FUNCTION_CALL,
 
     // scope
     NODE_SCOPE,
@@ -52,6 +53,7 @@ typedef enum
 	NODE_HEAD,
 	NODE_END_OF_FILE,
 	NODE_NEW_LINE,
+    NODE_RETURN,
 	NODE_ERROR,
 } NodeType;
 
@@ -91,7 +93,6 @@ void movePreviousToLeft(Node *node)
 		node->left->next = NULL;
 	}
 }
-
 
 unsigned char tokenIsType(Token **inputToken)
 {
@@ -154,6 +155,8 @@ Node *newEmptyNode()
     Node *node = (Node *)calloc(1, sizeof(Node));
     node->type = NODE_ERROR;
     node->modifiers = MODIFIER_NONE;
+    node->previous = NULL;
+    node->next = NULL;
 
     return node;
 }
@@ -161,6 +164,7 @@ Node *newEmptyNode()
 Node *parseExpression(Token **inputToken);
 Node *parseVariableDeclaration(Token **inputToken);
 Node *parseFunctionDeclaration(Token **inputToken);
+Node *parseFunctionCall(Token **inputToken);
 Node *parseScope(Token **inputToken);
 void freeNodeTree(Node *node);
 
@@ -169,7 +173,6 @@ Node *generateNodeAtPosition(Node *position, Token **inputToken, Node *previous)
 {
     Node *currentNode = newEmptyNode();
 
-    position = currentNode;
     if(previous != NULL)
     {
         currentNode->previous = previous;
@@ -178,9 +181,7 @@ Node *generateNodeAtPosition(Node *position, Token **inputToken, Node *previous)
 
     while((*inputToken)->type == TOKEN_MODIFIER)
     {
-        printf("%s\n", (*inputToken)->value.string_value);
         currentModifiers |= getModifierValueFromTokenString(inputToken);
-        printf("m%d\n", getModifierValueFromTokenString(inputToken));
         (*inputToken)++;
     }
 
@@ -236,8 +237,18 @@ Node *generateNodeAtPosition(Node *position, Token **inputToken, Node *previous)
             currentNode->value.float_value = (*inputToken)->value.float_value;
             break;
         case TOKEN_IDENTIFIER:
-            currentNode->type = NODE_IDENTIFIER;
             currentNode->value.string_value = strdup((*inputToken)->value.string_value);
+            if((*inputToken + 1)->type == TOKEN_LEFT_ROUND_BRACKET)
+            {
+                currentNode->type = NODE_FUNCTION_CALL;
+
+                (*inputToken)++;
+                currentNode->left = parseFunctionCall(inputToken);
+            } else 
+            {
+                currentNode->type = NODE_IDENTIFIER;
+            }
+
             break;
         case TOKEN_OPERATOR_ASSIGN:
             currentNode->type = NODE_OPERATOR_ASSIGN;
@@ -281,7 +292,11 @@ Node *generateNodeAtPosition(Node *position, Token **inputToken, Node *previous)
             (*inputToken)++;
             currentNode->type = NODE_SCOPE;
             currentNode->left = parseScope(inputToken);
-            printf("guh?\n");
+            break;
+        case TOKEN_RETURN:
+            (*inputToken)++;
+            currentNode->type = NODE_RETURN;
+            currentNode->left = parseExpression(inputToken);
             break;
         default:
             fprintf(stderr, "Unexpected token type: %d\n", (*inputToken)->type);
@@ -353,7 +368,6 @@ Node *parseFunctionDeclaration(Token **inputToken)
         if((*inputToken)->type == TOKEN_MODIFIER)
         {
             currentModifiers |= getModifierValueFromTokenString(inputToken);
-            printf("%d\n", getModifierValueFromTokenString(inputToken));
             (*inputToken)++;
             continue;
         }
@@ -362,7 +376,6 @@ Node *parseFunctionDeclaration(Token **inputToken)
         {
             Node *parameter = newEmptyNode();
             parameter->type = NODE_FUNCTION_PARAMETER;
-            printf("%d\n", currentModifiers);
             parameter->modifiers = currentModifiers;
             currentModifiers = MODIFIER_NONE;
 
@@ -426,6 +439,66 @@ Node *parseFunctionDeclaration(Token **inputToken)
     }
 
     return identifierNode;
+}
+
+Node *parseFunctionCall(Token **inputToken)
+{
+    if((*inputToken)->type != TOKEN_LEFT_ROUND_BRACKET)
+    {
+        fprintf(stderr, "Error: Expected '(' after identifier in function call\n");
+        return NULL;
+    }
+    (*inputToken)++;
+
+    Node *parameterList = NULL;
+    Node *lastParameter = NULL;
+
+    while((*inputToken)->type != TOKEN_RIGHT_ROUND_BRACKET)
+    {
+        if((*inputToken)->type == TOKEN_END_OF_FILE)
+        {
+            (*inputToken)--;
+            fprintf(stderr, "Error: No ')' to end function call found");
+            break;
+        }
+
+        Node *argument = parseExpression(inputToken); // Parse an argument expression
+        if(!argument)
+        {
+            fprintf(stderr, "Error: Invalid function argument\n");
+            return NULL;
+        }
+
+        if(lastParameter == NULL)
+        {
+            parameterList = argument;
+        }
+        else
+        {
+            lastParameter->next = argument;
+            argument->previous = lastParameter;
+        }
+        lastParameter = argument;
+
+        (*inputToken)++;
+        if ((*inputToken)->type == TOKEN_COMMA)
+        {
+            (*inputToken)++;
+        }
+        else if((*inputToken)->type != TOKEN_RIGHT_ROUND_BRACKET)
+        {
+            fprintf(stderr, "Error: Expected ',' or ')' in function call\n");
+            return NULL;
+        }
+    }
+
+    if((*inputToken)->type != TOKEN_RIGHT_ROUND_BRACKET)
+    {
+        fprintf(stderr, "Error: Expected ')' at the end of function call\n");
+        return NULL;
+    }
+
+    return parameterList;
 }
 
 Node *parseExpression(Token **inputToken)

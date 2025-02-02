@@ -8,21 +8,6 @@
 #include "tree.h"
 #include "modifiers.h"
 
-// case NODE_TYPE_INT:
-// case NODE_TYPE_FLOAT:
-// case NODE_TYPE_DOUBLE:
-// case NODE_TYPE_VOID:
-// case NODE_TYPE_uint8:
-// case NODE_TYPE_sint8:
-// case NODE_TYPE_uint16:
-// case NODE_TYPE_sint16:
-// case NODE_TYPE_uint32:
-// case NODE_TYPE_sint32:
-// case NODE_TYPE_uint64:
-// case NODE_TYPE_sint64:
-// case NODE_TYPE_double64:
-// case NODE_TYPE_double128:
-
 char *nodeTypeToString(Node *node)
 {
     switch(node->type)
@@ -140,6 +125,35 @@ char *parseNode(Node *node)
 
             return result;
         }
+        case NODE_FUNCTION_CALL:
+        {
+            char *identifierString = node->value.string_value;
+
+            char *args = (char *)malloc(1);
+            unsigned char hasArguments = node->left != NULL;
+            Node *current = node->left;
+            if(hasArguments)
+            {
+                while(current != NULL)
+                {
+                    char *value = parseNode(current);
+                    size_t argsStringSize = strlen(args) + strlen(value) + 3;
+                    args = (char *)realloc(args, argsStringSize);
+
+                    strcat(args, value);
+                    if(current->next != NULL) strcat(args, ", ");
+
+                    current = current->next;
+                }
+            }
+
+            size_t resultSize = strlen(identifierString) + 3 + strlen(args);
+            char *result = (char *)malloc(resultSize);
+
+            snprintf(result, resultSize, "%s(%s)", identifierString, args);
+
+            return result;
+        }
         case NODE_VALUE_INT:
         {
             char buffer[32];
@@ -206,6 +220,18 @@ char *parseNode(Node *node)
 		{
 			return strdup("\n");
 		}
+        case NODE_RETURN:
+        {
+            char *expressionString = parseNode(node->left);
+            size_t length = 8 + strlen(expressionString);
+            char *result = (char *)malloc(length);
+
+            strcat(result, "return ");
+            strcat(result, expressionString);
+
+            free(expressionString);
+            return result;
+        }
         case NODE_SCOPE:
         {
             char *result = strdup("{ ");
