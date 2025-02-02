@@ -1,3 +1,5 @@
+#include "stdio.h"
+
 int banana(int x, int y)
 {
     return x + y;
@@ -5,5 +7,6 @@ int banana(int x, int y)
 
 int main()
 {
-    return banana(-1, 1);
+    printf("Hello QCC: %d\n", banana(1, 5));
+    return 0;
 }

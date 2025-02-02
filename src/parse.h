@@ -152,6 +152,7 @@ char *parseNode(Node *node)
 
             snprintf(result, resultSize, "%s(%s)", identifierString, args);
 
+            free(args);
             return result;
         }
         case NODE_VALUE_INT:
@@ -230,6 +231,45 @@ char *parseNode(Node *node)
             strcat(result, expressionString);
 
             free(expressionString);
+            return result;
+        }
+        case NODE_COMPILER_MACRO:
+        {
+            char *macroName = node->value.string_value;
+
+            char *args = (char *)malloc(1);
+            unsigned char hasArguments = node->left != NULL;
+            Node *current = node->left;
+            if(hasArguments)
+            {
+                while(current != NULL)
+                {
+                    char *value = parseNode(current);
+                    size_t argsStringSize = strlen(args) + strlen(value) + 2;
+                    args = (char *)realloc(args, argsStringSize);
+
+                    strcat(args, value);
+                    if(current->next != NULL) strcat(args, " ");
+
+                    current = current->next;
+                }
+            }
+
+            size_t resultSize = strlen(macroName) + 4 + strlen(args);
+            char *result = (char *)malloc(resultSize);
+
+            snprintf(result, resultSize, "#%s %s\n", macroName, args);
+
+            free(args);
+            return result;
+        }
+        case NODE_VALUE_STRING:
+        {
+            size_t resultSize = strlen(node->value.string_value) + 3;
+            char *result = (char *)malloc(resultSize);
+
+            snprintf(result, resultSize, "\"%s\"", node->value.string_value);
+
             return result;
         }
         case NODE_SCOPE:

@@ -30,6 +30,7 @@ typedef enum
 	// values
 	NODE_VALUE_INT,
 	NODE_VALUE_FLOAT,
+    NODE_VALUE_STRING,
 
 	// operators
     NODE_OPERATOR_ASSIGN,
@@ -51,6 +52,7 @@ typedef enum
 
 	// miscelanious
 	NODE_HEAD,
+    NODE_COMPILER_MACRO,
 	NODE_END_OF_FILE,
 	NODE_NEW_LINE,
     NODE_RETURN,
@@ -297,6 +299,20 @@ Node *generateNodeAtPosition(Node *position, Token **inputToken, Node *previous)
             (*inputToken)++;
             currentNode->type = NODE_RETURN;
             currentNode->left = parseExpression(inputToken);
+            break;
+        case TOKEN_VALUE_STRING:
+            currentNode->type = NODE_VALUE_STRING;
+            currentNode->value.string_value = (*inputToken)->value.string_value;
+            break;
+        case TOKEN_COMPILER_MACRO:
+            currentNode->type = NODE_COMPILER_MACRO;
+            currentNode->value.string_value = (*inputToken)->value.string_value;
+            (*inputToken)++;
+
+            if(strcmp(currentNode->value.string_value, "include") == 0)
+            {
+                currentNode->left = generateNodeAtPosition(NULL, inputToken, NULL);
+            }
             break;
         default:
             fprintf(stderr, "Unexpected token type: %d\n", (*inputToken)->type);

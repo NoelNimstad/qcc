@@ -24,6 +24,7 @@ typedef enum
 	TOKEN_VALUE_INT,    // integer value
 	TOKEN_VALUE_FLOAT,  // floating point value
 	TOKEN_VALUE_DOUBLE, // double value
+	TOKEN_VALUE_STRING,
 
 	// variables
 	TOKEN_IDENTIFIER, // identifier name
@@ -44,6 +45,7 @@ typedef enum
 
 	// keywords
 	TOKEN_RETURN, // return keyword
+	TOKEN_COMPILER_MACRO,
 
 	// miscelanious
 	TOKEN_ERROR,       // error token, default

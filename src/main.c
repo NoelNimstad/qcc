@@ -1,6 +1,6 @@
 /**
  * @brief The QCC (Queue-lang Compiler Collection) compiler
- * @version 0.0.1a
+ * @version 0.0.2a
  * @date 2025-01-25
  */
 

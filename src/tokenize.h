@@ -153,7 +153,52 @@ Token *tokenize(char *file)
 				current->type = TOKEN_COMMA;
 				current++;
 				break;
+			case '"':
+			{
+				current->type = TOKEN_VALUE_STRING;
+				character++;
+
+				size_t size = 32;
+				char *buffer = (char *)malloc(size);
+				int i = 0;
+				while((*character) != '"'
+				   && (*character) != '\0')
+				{
+					buffer[i++] = *character;
+					if(i == size)
+					{
+						size *= 2;
+						buffer = (char *)realloc(buffer, size);
+					}
+					character++;
+				}
+				buffer[i] = '\0';
+				current->value.string_value = strdup(buffer);
+
+				free(buffer);
+				current++;
+				break;
+			}
+			case '#':
+			{
+				current->type = TOKEN_COMPILER_MACRO;
+				character++;
+
+				char buffer[32];
+				int i = 0;
+				while(isalnum(*character))
+				{
+					buffer[i++] = *character;
+					character++;
+				}
+				buffer[i] = '\0';
+				current->value.string_value = strdup(buffer);
+
+				current++;
+				break;
+			}
 			case '@':
+			{
 				current->type = TOKEN_MODIFIER;
 				character++;
 
@@ -168,6 +213,8 @@ Token *tokenize(char *file)
 				current->value.string_value = strdup(buffer);
 
 				current++;
+				break;
+			}
             default:
                 break;
         }
