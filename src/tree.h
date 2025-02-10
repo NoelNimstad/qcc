@@ -37,6 +37,10 @@ typedef enum
     NODE_OPERATOR_PLUS,
     NODE_OPERATOR_MINUS,
     NODE_OPERATOR_MULTIPLY,
+    NODE_OPERATOR_LESS_THAN,	
+    NODE_OPERATOR_LESS_THAN_EQUAL,	
+	NODE_OPERATOR_GREATER_THAN,	
+	NODE_OPERATOR_GREATER_THAN_EQUAL,	
     NODE_OPERATOR_DIVIDE,
     NODE_OPERATOR_SEMI_COLON,
 
@@ -49,6 +53,10 @@ typedef enum
 
     // scope
     NODE_SCOPE,
+
+    // keywords
+    NODE_FOR_LOOP,
+    NODE_WHILE_LOOP,
 
 	// miscelanious
 	NODE_HEAD,
@@ -171,15 +179,9 @@ Node *parseScope(Token **inputToken);
 void freeNodeTree(Node *node);
 
 unsigned int currentModifiers;
-Node *generateNodeAtPosition(Node *position, Token **inputToken, Node *previous)
+Node *generateNode(Token **inputToken, Node *previous)
 {
     Node *currentNode = newEmptyNode();
-
-    if(previous != NULL)
-    {
-        currentNode->previous = previous;
-        previous->next = currentNode;
-    }
 
     while((*inputToken)->type == TOKEN_MODIFIER)
     {
@@ -252,6 +254,10 @@ Node *generateNodeAtPosition(Node *position, Token **inputToken, Node *previous)
             }
 
             break;
+        case TOKEN_OPERATOR_SPREAD:
+            printf("%d\n", previous == NULL);
+
+            break;
         case TOKEN_OPERATOR_ASSIGN:
             currentNode->type = NODE_OPERATOR_ASSIGN;
             movePreviousToLeft(currentNode);
@@ -259,14 +265,43 @@ Node *generateNodeAtPosition(Node *position, Token **inputToken, Node *previous)
             (*inputToken)++;
             currentNode->right = parseExpression(inputToken);
             return currentNode;
+        case TOKEN_KEYWORD_WHILE:
+            currentNode->type = NODE_WHILE_LOOP;
+
+            if((*inputToken+1)->type == TOKEN_LEFT_ROUND_BRACKET)
+            {
+                (*inputToken)++;
+                (*inputToken)++;
+                
+                currentNode->left = parseExpression(inputToken);
+        
+                if((*inputToken)->type != TOKEN_RIGHT_ROUND_BRACKET)
+                {
+                    fprintf(stderr, "Error: Expected closing ) after expression\n");
+                    return NULL;
+                }
+            } else 
+            {
+                fprintf(stderr, "Error: Expected ( after while\n");
+                return NULL;
+            }
+            break;
         case TOKEN_OPERATOR_PLUS:
         case TOKEN_OPERATOR_MINUS:
         case TOKEN_OPERATOR_STAR:
         case TOKEN_OPERATOR_DIVIDE:
-            currentNode->type = ((*inputToken)->type == TOKEN_OPERATOR_PLUS)  ? NODE_OPERATOR_PLUS     :
-                                ((*inputToken)->type == TOKEN_OPERATOR_MINUS) ? NODE_OPERATOR_MINUS    :
-                                ((*inputToken)->type == TOKEN_OPERATOR_STAR)  ? NODE_OPERATOR_MULTIPLY :
-                                                                                NODE_OPERATOR_DIVIDE;
+        case TOKEN_OPERATOR_LESS_THAN:
+        case TOKEN_OPERATOR_LESS_THAN_EQUAL:
+        case TOKEN_OPERATOR_GREATER_THAN:
+        case TOKEN_OPERATOR_GREATER_THAN_EQUAL:
+            currentNode->type = ((*inputToken)->type == TOKEN_OPERATOR_PLUS)               ? NODE_OPERATOR_PLUS               :
+                                ((*inputToken)->type == TOKEN_OPERATOR_MINUS)              ? NODE_OPERATOR_MINUS              :
+                                ((*inputToken)->type == TOKEN_OPERATOR_STAR)               ? NODE_OPERATOR_MULTIPLY           :
+                                ((*inputToken)->type == TOKEN_OPERATOR_LESS_THAN)          ? NODE_OPERATOR_LESS_THAN          :
+                                ((*inputToken)->type == TOKEN_OPERATOR_LESS_THAN_EQUAL)    ? NODE_OPERATOR_LESS_THAN_EQUAL    :
+                                ((*inputToken)->type == TOKEN_OPERATOR_GREATER_THAN)       ? NODE_OPERATOR_GREATER_THAN       :
+                                ((*inputToken)->type == TOKEN_OPERATOR_GREATER_THAN_EQUAL) ? NODE_OPERATOR_GREATER_THAN_EQUAL :
+                                                                                             NODE_OPERATOR_DIVIDE;
 
             movePreviousToLeft(currentNode);
             (*inputToken)++;
@@ -292,6 +327,8 @@ Node *generateNodeAtPosition(Node *position, Token **inputToken, Node *previous)
             break;
         case TOKEN_LEFT_CURLY_BRACKET:
             (*inputToken)++;
+            currentNode->modifiers = currentModifiers;
+            currentModifiers = MODIFIER_NONE;
             currentNode->type = NODE_SCOPE;
             currentNode->left = parseScope(inputToken);
             break;
@@ -311,7 +348,7 @@ Node *generateNodeAtPosition(Node *position, Token **inputToken, Node *previous)
 
             if(strcmp(currentNode->value.string_value, "include") == 0)
             {
-                currentNode->left = generateNodeAtPosition(NULL, inputToken, NULL);
+                currentNode->left = generateNode(inputToken, NULL);
             }
             break;
         default:
@@ -519,14 +556,19 @@ Node *parseFunctionCall(Token **inputToken)
 
 Node *parseExpression(Token **inputToken)
 {
-    Node *leftNode = generateNodeAtPosition(NULL, inputToken, NULL);
+    Node *leftNode = generateNode(inputToken, NULL);
 
-    while((*inputToken)->type == TOKEN_OPERATOR_PLUS  ||
-          (*inputToken)->type == TOKEN_OPERATOR_MINUS ||
-          (*inputToken)->type == TOKEN_OPERATOR_STAR  ||
+    while((*inputToken)->type == TOKEN_OPERATOR_PLUS               ||
+          (*inputToken)->type == TOKEN_OPERATOR_MINUS              ||
+          (*inputToken)->type == TOKEN_OPERATOR_STAR               ||
+          (*inputToken)->type == TOKEN_OPERATOR_GREATER_THAN       ||
+          (*inputToken)->type == TOKEN_OPERATOR_GREATER_THAN_EQUAL ||
+          (*inputToken)->type == TOKEN_OPERATOR_LESS_THAN          ||
+          (*inputToken)->type == TOKEN_OPERATOR_LESS_THAN_EQUAL    ||
           (*inputToken)->type == TOKEN_OPERATOR_DIVIDE)
     {
-        Node *operatorNode = generateNodeAtPosition(NULL, inputToken, leftNode);
+        (*inputToken)++;
+        Node *operatorNode = generateNode(inputToken, leftNode);
         operatorNode->left = leftNode;
         leftNode = operatorNode;
     }
@@ -547,7 +589,7 @@ Node *parseScope(Token **inputToken)
             break;
         }
 
-        Node *statement = generateNodeAtPosition(NULL, inputToken, NULL);
+        Node *statement = generateNode(inputToken, NULL);
         if(statementList == NULL)
         {
             statementList = statement;
@@ -569,7 +611,7 @@ Node *generateNodeTree(Token *tokens)
 	head->type = NODE_HEAD;
 	Node *currentNode = head;
 
-	for (Token *currentToken = tokens; currentToken->type != TOKEN_END_OF_FILE;)
+	for(Token *currentToken = tokens; currentToken->type != TOKEN_END_OF_FILE;)
 	{
 		if(currentToken->type == TOKEN_ERROR)
 		{
@@ -577,7 +619,9 @@ Node *generateNodeTree(Token *tokens)
 			continue;
 		}
 
-		currentNode = generateNodeAtPosition(currentNode->next, &currentToken, currentNode);
+		currentNode->next = generateNode(&currentToken, currentNode);
+        currentNode->next->previous = currentNode;
+        currentNode = currentNode->next;
 		currentToken++;
 	}
 

@@ -15,6 +15,7 @@ Keyword keywordTable[] =
 {
     { "int", TOKEN_TYPE_INT },
     { "uint8", TOKEN_TYPE_uint8 },
+    { "bool", TOKEN_TYPE_uint8 },
     { "sint8", TOKEN_TYPE_sint8 },
     { "uint16", TOKEN_TYPE_uint16 },
     { "sint16", TOKEN_TYPE_sint16 },
@@ -27,7 +28,10 @@ Keyword keywordTable[] =
     { "double64", TOKEN_TYPE_double64 },
     { "double128", TOKEN_TYPE_double128 },
     { "void", TOKEN_TYPE_VOID },
-    { "return", TOKEN_RETURN }
+    { "return", TOKEN_RETURN },
+    { "false", TOKEN_VALUE_FALSE },
+    { "true", TOKEN_VALUE_TRUE },
+    { "while", TOKEN_KEYWORD_WHILE },
 };
 
 #endif // KEYWORDS_H

@@ -28,12 +28,12 @@ Token *tokenize(char *file)
 			continue;
 		}
 
-		if(isalpha(*character))
+		if(isalpha(*character) || *character == '_')
 		{
 			char buffer[VARIABLE_NAME_MAX_LENGTH];
 			int i = 0;
 
-			while(isalnum(*character))
+			while(isalnum(*character) || *character == '_')
 			{
 				buffer[i++] = *character;
 				character++;
@@ -48,7 +48,20 @@ Token *tokenize(char *file)
 					current->type = entry->type;
 				}
 			}
-			current->value.string_value = strdup(buffer);
+
+			if(current->type == TOKEN_VALUE_FALSE)
+			{
+				current->type = TOKEN_VALUE_INT;
+				current->value.int_value = 0;
+			} else if(current->type == TOKEN_VALUE_TRUE)
+			{
+				current->type = TOKEN_VALUE_INT;
+				current->value.int_value = 1;
+			} else 
+			{
+				current->value.string_value = strdup(buffer);
+			}
+
 			current++;
 		}
 
@@ -118,6 +131,24 @@ Token *tokenize(char *file)
 					current++;
 				}
 				break;
+			case '<':
+				current->type = TOKEN_OPERATOR_LESS_THAN;
+				if(*(character+1) == '=')
+				{
+					character++;
+					current->type = TOKEN_OPERATOR_LESS_THAN_EQUAL;
+				}
+				current++;
+				break;
+			case '>':
+				current->type = TOKEN_OPERATOR_GREATER_THAN;
+				if(*(character+1) == '=')
+				{
+					character++;
+					current->type = TOKEN_OPERATOR_GREATER_THAN_EQUAL;
+				}
+				current++;
+				break;
             case ')':
                 current->type = TOKEN_RIGHT_ROUND_BRACKET;
                 current++;
@@ -149,9 +180,25 @@ Token *tokenize(char *file)
                 current->type = TOKEN_OPERATOR_ASSIGN;
                 current++;
                 break;
+			case '.':
+				if(*(character+1) == '.')
+				{
+					character++;
+					current->type = TOKEN_OPERATOR_SPREAD;
+				}
+				current++;
+				break;
 			case ',':
 				current->type = TOKEN_COMMA;
 				current++;
+				break;
+			case '?':
+				if(*(character+1) == '?')
+				{
+					character++;
+					current->type = TOKEN_OPERATOR_NULL_COALESCING;
+					current++;
+				}
 				break;
 			case '"':
 			{

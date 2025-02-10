@@ -1,12 +1,13 @@
 #include "stdio.h"
 
-int banana(int x, int y)
-{
-    return x + y;
-}
-
 int main()
 {
-    printf("Hello QCC: %d\n", banana(1, 5));
+    int a = 0;
+
+    while(a < 5)
+    {
+        a = a + 1;
+    }
+
     return 0;
 }

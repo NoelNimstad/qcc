@@ -60,6 +60,7 @@ char *nodeTypeToString(Node *node)
     }
 }
 
+int onces = 0;
 char *parseNode(Node *node)
 {
     if (node == NULL) return strdup("");
@@ -188,16 +189,25 @@ char *parseNode(Node *node)
         case NODE_OPERATOR_MINUS:
         case NODE_OPERATOR_MULTIPLY:
         case NODE_OPERATOR_DIVIDE:
+        case NODE_OPERATOR_LESS_THAN:
+        case NODE_OPERATOR_LESS_THAN_EQUAL:
+        case NODE_OPERATOR_GREATER_THAN:
+        case NODE_OPERATOR_GREATER_THAN_EQUAL:
         {
             char *leftString = parseNode(node->left);
             char *rightString = parseNode(node->right);
 
             const char *op =
-                (node->type == NODE_OPERATOR_PLUS)     ? "+" :
-                (node->type == NODE_OPERATOR_MINUS)    ? "-" :
-                (node->type == NODE_OPERATOR_MULTIPLY) ? "*" : "/";
+                (node->type == NODE_OPERATOR_PLUS)               ? "+" :
+                (node->type == NODE_OPERATOR_MINUS)              ? "-" :
+                (node->type == NODE_OPERATOR_MULTIPLY)           ? "*" : 
+                (node->type == NODE_OPERATOR_LESS_THAN)          ? "<"  : 
+                (node->type == NODE_OPERATOR_LESS_THAN_EQUAL)    ? "<=" : 
+                (node->type == NODE_OPERATOR_GREATER_THAN)       ? ">"  : 
+                (node->type == NODE_OPERATOR_GREATER_THAN_EQUAL) ? ">=" : 
+                                                                   "/";
 
-            size_t resultSize = strlen(leftString) + strlen(rightString) + 4;
+            size_t resultSize = strlen(leftString) + strlen(rightString) + strlen(op) + 3;
             char *result = (char *)malloc(resultSize);
             snprintf(result, resultSize, "%s %s %s", leftString, op, rightString);
 
@@ -274,7 +284,22 @@ char *parseNode(Node *node)
         }
         case NODE_SCOPE:
         {
+            unsigned char once = (node->modifiers & MODIFIER_ONCE) != 0;
+
             char *result = strdup("{ ");
+
+            if(once)
+            {
+                size_t variableDeclarationSize = 60;
+                char *variableDeclaration = (char *)malloc(variableDeclarationSize);
+                snprintf(variableDeclaration, variableDeclarationSize, "static int __Q_ONCE_%d=0;if(!__Q_ONCE_%d){ __Q_ONCE_%d=1; ", onces, onces, onces);
+
+                result = (char *)realloc(result, strlen(result) + strlen(variableDeclaration) + 1);
+                strcat(result, variableDeclaration);
+                free(variableDeclaration);
+
+                onces++;
+            }
 
             Node *current = node->left;
             while (current != NULL)
@@ -284,6 +309,11 @@ char *parseNode(Node *node)
                 strcat(result, stmtString);
                 free(stmtString);
                 current = current->next;
+            }
+            if(once)
+            {
+                result = realloc(result, strlen(result) + 4);
+                strcat(result, "} ");
             }
 
             result = realloc(result, strlen(result) + 3);

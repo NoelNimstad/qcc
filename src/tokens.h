@@ -24,6 +24,8 @@ typedef enum
 	TOKEN_VALUE_INT,    // integer value
 	TOKEN_VALUE_FLOAT,  // floating point value
 	TOKEN_VALUE_DOUBLE, // double value
+	TOKEN_VALUE_FALSE,
+	TOKEN_VALUE_TRUE,
 	TOKEN_VALUE_STRING,
 
 	// variables
@@ -36,15 +38,22 @@ typedef enum
 	TOKEN_RIGHT_CURLY_BRACKET, // }
 
 	// operators
-	TOKEN_OPERATOR_SEMI_COLON, // ;
-	TOKEN_OPERATOR_PLUS,       // +
-	TOKEN_OPERATOR_MINUS,      // -
-	TOKEN_OPERATOR_STAR,   	   // *
-	TOKEN_OPERATOR_DIVIDE,     // /
-	TOKEN_OPERATOR_ASSIGN,     // =
+	TOKEN_OPERATOR_SEMI_COLON, 	  	   // ;
+	TOKEN_OPERATOR_PLUS,       	  	   // +
+	TOKEN_OPERATOR_MINUS,      	  	   // -
+	TOKEN_OPERATOR_STAR,   	   	  	   // *
+	TOKEN_OPERATOR_LESS_THAN,		   // <
+	TOKEN_OPERATOR_LESS_THAN_EQUAL,	   // <=
+	TOKEN_OPERATOR_GREATER_THAN,	   // >
+	TOKEN_OPERATOR_GREATER_THAN_EQUAL, // >=
+	TOKEN_OPERATOR_DIVIDE,     	  	   // /
+	TOKEN_OPERATOR_ASSIGN,     	  	   // =
+	TOKEN_OPERATOR_NULL_COALESCING,    // ??
+	TOKEN_OPERATOR_SPREAD,			   // ..
 
 	// keywords
 	TOKEN_RETURN, // return keyword
+	TOKEN_KEYWORD_WHILE,
 	TOKEN_COMPILER_MACRO,
 
 	// miscelanious
