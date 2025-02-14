@@ -9,7 +9,7 @@ int main(int argc, char const *argv[])
 {
 	ASSERT(argc >= 3, "Not enough arguments supplied.\n\tProper usage: qlang <IN.Q> <OUT>\n");
 
-	{ // Read file
+	{ // Read file contents (move to seperate function later)
 		FILE *filePointer = fopen(argv[1], "r");
 		ASSERT(filePointer != NULL, "Input file \"%s\" does not exist.\n", argv[1]);
 
