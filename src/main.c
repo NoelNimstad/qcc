@@ -1,65 +1,17 @@
 /**
- * @brief The QCC (Queue-lang Compiler Collection) compiler
- * @version 0.0.2a
- * @date 2025-01-25
- */
+ * @brief Qlang v2
+ * @author QuantVasa
+*/
 
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "tokens.h"
-#include "tokenize.h"
-#include "tree.h"
-#include "debug.h"
-#include "parse.h"
+#include "qlang.h"
 
 int main(int argc, char const *argv[])
 {
 	if(argc < 3)
 	{
-		printf("Invalid number of arguments.\n");
-		return 1;
-	}
+		fprintf(stderr, "Error: Not enough arguments.\nProper usage: qlang <IN.Q> <OUT>\n");
+		return EXIT_FAILURE;
+	};
 
-	FILE *filePointer = fopen(argv[1], "r");
-	if(filePointer == NULL)
-	{
-		printf("Unable to open input file.\n");
-		fclose(filePointer);
-		return 1;
-	}
-
-	fseek(filePointer, 0, SEEK_END);
-	long fileSize = ftell(filePointer);
-	fseek(filePointer, 0, SEEK_SET);
-
-	char *fileContents = malloc(fileSize + 1);
-	fread(fileContents, fileSize, 1, filePointer);
-	fclose(filePointer);
-	fileContents[fileSize] = 0;
-
-	Token *tokens = tokenize(fileContents);
-	Node *headNode = generateNodeTree(tokens);
-	char *result = parseTree(headNode);
-
-	filePointer = fopen(argv[2], "w");
-	if(filePointer == NULL)
-	{
-		printf("Unable to open output file.\n");
-		fclose(filePointer);
-		free(result);
-		freeNodeTree(headNode);
-		freeTokens(tokens);
-		free(fileContents);
-		return 1;
-	}
-
-	fprintf(filePointer, "%s", result);
-	fclose(filePointer);
-
-	free(result);
-	freeNodeTree(headNode);
-	freeTokens(tokens);
-	free(fileContents);
-	return 0;
-}
+	return EXIT_SUCCESS;
+};
