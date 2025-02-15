@@ -10,7 +10,7 @@ struct QLANG_STRUCT
 {
     char *fileContents;
     unsigned int line, column;
-}; struct QLANG_STRUCT qlang;
+};
 
 // Colors
 #define COLOR_RED    "\x1B[31m"
@@ -24,5 +24,8 @@ struct QLANG_STRUCT
 
 // Cleanup
 void destroyQlangStruct(struct QLANG_STRUCT *qlang);
+
+// Main process
+void processFile(const char *path);
 
 #endif // QLANG_H
