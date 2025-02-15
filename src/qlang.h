@@ -11,8 +11,14 @@ struct QLANG_STRUCT
     char *fileContents;
     unsigned int line, column;
 };
+/*
+    The qlang struct will contain everything
+    which is needed for the qlang compiler to
+    run through some file, including line & column 
+    values as well as tokens & an AST.
+*/
 
-// Colors
+// ANSI terminal colors
 #define COLOR_RED    "\x1B[31m"
 #define COLOR_YELLOW "\x1B[33m"
 #define COLOR_GREEN  "\x1B[32m"
@@ -25,7 +31,7 @@ struct QLANG_STRUCT
 // Cleanup
 void destroyQlangStruct(struct QLANG_STRUCT *qlang);
 
-// Main process
+// Main process (to process some file)
 void processFile(const char *path);
 
 #endif // QLANG_H
