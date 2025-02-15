@@ -20,7 +20,7 @@ struct QLANG_STRUCT
 
 // Errors
 #define ASSERT(_e, ...) if(!(_e)){ fprintf(stderr, COLOR_RED "Qlang error" COLOR_RESET ": "); fprintf(stderr, __VA_ARGS__); exit(EXIT_FAILURE); }
-#define WARN(_w, ...) if(!(_w)){ fprintf(stderr, COLOR_YELLOW "Qlang warning" COLOR_RESET ": "); fprintf(stderr, __VA_ARGS__); }
+#define SOFT_ASSERT(_w, ...) if(!(_w)){ fprintf(stderr, COLOR_YELLOW "Qlang warning" COLOR_RESET ": "); fprintf(stderr, __VA_ARGS__); }
 
 // Cleanup
 void destroyQlangStruct(struct QLANG_STRUCT *qlang);

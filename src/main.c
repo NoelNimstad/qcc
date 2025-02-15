@@ -17,7 +17,7 @@ int main(int argc, char const *argv[])
 		size_t fileSize = ftell(filePointer);
 		rewind(filePointer);
 
-		WARN(fileSize != 0, "Input file \"%s\" is empty.\n", argv[1]);
+		SOFT_ASSERT(fileSize != 0, "Input file \"%s\" is empty.\n", argv[1]);
 
 		qlang.fileContents = (char *)malloc(fileSize);
 		ASSERT(qlang.fileContents != NULL, "Failed to allocate memory (%zu bytes) for file contents.\n", fileSize);
