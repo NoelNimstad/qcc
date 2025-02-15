@@ -4,12 +4,14 @@
 // Includes
 #include <stdio.h>
 #include <stdlib.h>
+#include "token.h"
 
 // Qlang struct
-struct QLANG_STRUCT
+struct qlangStruct
 {
     char *fileContents;
     unsigned int line, column;
+    struct token *tokens;
 };
 /*
     The qlang struct will contain everything
@@ -30,7 +32,7 @@ struct QLANG_STRUCT
 #define SOFT_ASSERT(_w, ...) if(!(_w)){ fprintf(stderr, COLOR_YELLOW "Qlang warning" COLOR_RESET ": "); fprintf(stderr, __VA_ARGS__); }
 
 // Cleanup
-void destroyQlangStruct(struct QLANG_STRUCT *qlang);
+void destroyQlangStruct(struct qlangStruct *qlang);
 
 // Main process (to process some file)
 void processFile(const char *path);

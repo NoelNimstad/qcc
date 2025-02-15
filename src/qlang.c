@@ -1,13 +1,13 @@
 #include "qlang.h"
 
-void destroyQlangStruct(struct QLANG_STRUCT *qlang)
+void destroyQlangStruct(struct qlangStruct *qlang)
 {
     free(qlang->fileContents);
 }
 
 void processFile(const char *path)
 {
-    struct QLANG_STRUCT qlang;
+    struct qlangStruct qlang;
 
     { // Read file
 		FILE *filePointer = fopen(path, "r");
