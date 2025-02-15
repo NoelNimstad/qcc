@@ -14,8 +14,9 @@ struct QLANG_STRUCT
 /*
     The qlang struct will contain everything
     which is needed for the qlang compiler to
-    run through some file, including line & column 
-    values as well as tokens & an AST.
+    run through some file, including settings,
+    line & column values as well as tokens
+    and the AST.
 */
 
 // ANSI terminal colors
@@ -24,7 +25,7 @@ struct QLANG_STRUCT
 #define COLOR_GREEN  "\x1B[32m"
 #define COLOR_RESET  "\x1B[0m"
 
-// Errors
+// Catch & warn for errors
 #define ASSERT(_e, ...) if(!(_e)){ fprintf(stderr, COLOR_RED "Qlang error" COLOR_RESET ": "); fprintf(stderr, __VA_ARGS__); exit(EXIT_FAILURE); }
 #define SOFT_ASSERT(_w, ...) if(!(_w)){ fprintf(stderr, COLOR_YELLOW "Qlang warning" COLOR_RESET ": "); fprintf(stderr, __VA_ARGS__); }
 
