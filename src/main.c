@@ -17,13 +17,10 @@ int main(int argc, char const *argv[])
 		size_t fileSize = ftell(filePointer);
 		rewind(filePointer);
 
-		if(fileSize == 0)
-		{
-			printWarning("Input file is empty", NULL);
-		}
+		WARN(fileSize != 0, "Input file \"%s\" is empty.\n", argv[1]);
 
 		qlang.fileContents = (char *)malloc(fileSize);
-		ASSERT(qlang.fileContents != NULL, "Failed to allocate memory for file contents.\n");
+		ASSERT(qlang.fileContents != NULL, "Failed to allocate memory (%zu bytes) for file contents.\n", fileSize);
 
 		fread(qlang.fileContents, 1, fileSize, filePointer);
 

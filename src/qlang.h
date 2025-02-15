@@ -18,12 +18,9 @@ struct QLANG_STRUCT
 #define COLOR_GREEN  "\x1B[32m"
 #define COLOR_RESET  "\x1B[0m"
 
-// Debug
-void printError(const char *reason, const char *help);   // For printing fatal errors
-void printWarning(const char *reason, const char *help); // For printing non fatal warnings
-
 // Errors
 #define ASSERT(_e, ...) if(!(_e)){ fprintf(stderr, COLOR_RED "Qlang error" COLOR_RESET ": "); fprintf(stderr, __VA_ARGS__); exit(EXIT_FAILURE); }
+#define WARN(_w, ...) if(!(_w)){ fprintf(stderr, COLOR_YELLOW "Qlang warning" COLOR_RESET ": "); fprintf(stderr, __VA_ARGS__); }
 
 // Cleanup
 void destroyQlangStruct(struct QLANG_STRUCT *qlang);
