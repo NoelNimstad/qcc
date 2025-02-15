@@ -1,5 +1,5 @@
 /**
- * @brief Qlang
+ * @name Qlang
 */
 
 #include "qlang.h"
