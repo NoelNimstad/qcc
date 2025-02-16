@@ -12,6 +12,7 @@
 // Qlang struct
 struct qlangStruct
 {
+    unsigned char debug;
     char *fileContents;
     unsigned int line, column;
     struct token *tokens;

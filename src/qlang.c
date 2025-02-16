@@ -8,29 +8,43 @@ void debugPrintTokens(struct qlangStruct *qlang)
 	for(struct token *currentToken = qlang->tokens; currentToken->type != TOKEN_END_OF_FILE; currentToken++)
 	{
 		i++;
+		printf("\t");
 		switch(currentToken->type)
 		{
 			case TOKEN_TYPE_INT:
-				printf("\tTYPE_INT\n");
+				printf("TYPE_INT");
 				break;
 			case TOKEN_IDENTIFIER:
-				printf("\tIDENTIFIER(%s)\n", currentToken->value.string);
+				printf("IDENTIFIER(%s)", currentToken->value.string);
 				break;
 			case TOKEN_OPERATOR_ASSIGN:
-				printf("\tOPERATOR_ASSIGN\n");
+				printf("OPERATOR_ASSIGN");
 				break;
 			case TOKEN_VALUE_INT:
-				printf("\tINT(%d)\n", currentToken->value.integer);
+				printf("INT(%d)", currentToken->value.integer);
 				break;
 			case TOKEN_SEMI_COLON:
-				printf("\tSEMI_COLON\n");
+				printf("SEMI_COLON");
+				break;
+			case TOKEN_ERROR:
+				printf("(ERROR)");
+				break;
+			case TOKEN_OPERATOR_SPREAD:
+				printf("OPERATOR_SPREAD");
+				break;
+			case TOKEN_LEFT_SQUARE_BRACKET:
+				printf("LEFT_SQUARE_BRACKET");
+				break;
+			case TOKEN_RIGHT_SQUARE_BRACKET:
+				printf("RIGHT_SQUARE_BRACKET");
 				break;
 			default:
 				break;
-		}
+			}
+		printf("\n");
     }
 
-	printf(COLOR_GREEN "\tEND_OF_FILE (%d tokens printed)\n" COLOR_RESET, i + 1);
+	printf(COLOR_GREEN "\tEND_OF_FILE (%d tokens)\n" COLOR_RESET, i + 1);
 }
 
 void destroyQlangStruct(struct qlangStruct *qlang)

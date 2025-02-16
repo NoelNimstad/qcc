@@ -66,9 +66,10 @@ struct token *generateTokens(char *source)
             }
             currentToken++;
             free(buffer);
+            continue;
         }
 
-        if(isnumber(*currentCharacter))
+        if(isnumber(*currentCharacter)) // Numbers
         {
             unsigned char bufferLength = 32; 
             char *buffer = (char *)malloc(bufferLength);
@@ -93,6 +94,7 @@ struct token *generateTokens(char *source)
 
             currentToken++;
             free(buffer);
+            continue;
         }
 
         switch(*currentCharacter)
@@ -103,6 +105,22 @@ struct token *generateTokens(char *source)
                 break;
             case '=':
                 currentToken->type = TOKEN_OPERATOR_ASSIGN;
+                currentToken++;
+                break;
+            case '.':
+                if(PEEK(currentCharacter) == '.')
+                {
+                    currentCharacter++;
+                    currentToken->type = TOKEN_OPERATOR_SPREAD;
+                    currentToken++;
+                }
+                break;
+            case '[':
+                currentToken->type = TOKEN_LEFT_SQUARE_BRACKET;
+                currentToken++;
+                break;
+            case ']':
+                currentToken->type = TOKEN_RIGHT_SQUARE_BRACKET;
                 currentToken++;
                 break;
             default:
