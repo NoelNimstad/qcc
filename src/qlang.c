@@ -3,6 +3,7 @@
 void destroyQlangStruct(struct qlangStruct *qlang)
 {
     free(qlang->fileContents);
+	free(qlang->tokens);
 }
 
 void processFile(const char *path)
@@ -26,6 +27,8 @@ void processFile(const char *path)
 
 		fclose(filePointer);
     }
+
+	qlang.tokens = generateTokens(qlang.fileContents);
 
     destroyQlangStruct(&qlang);
 }

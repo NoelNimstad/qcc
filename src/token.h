@@ -1,6 +1,8 @@
 #ifndef TOKEN_H
 #define TOKEN_H
 
+#include "string.h"
+
 enum tokenType
 {
     TOKEN_TYPE_INT,
@@ -11,7 +13,7 @@ enum tokenType
 
 struct token
 {
-    tokenType type;
+    enum tokenType type;
     union
     {
         int integer;

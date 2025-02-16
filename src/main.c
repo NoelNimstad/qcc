@@ -10,4 +10,4 @@ int main(int argc, char const *argv[])
 	processFile(argv[1]); // Process main supplied file
 
 	return EXIT_SUCCESS;
-};
+}
