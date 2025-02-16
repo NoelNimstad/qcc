@@ -37,6 +37,9 @@ struct qlangStruct
 #define ASSERT(_e, ...) if(!(_e)){ fprintf(stderr, COLOR_RED "Qlang error" COLOR_RESET ": "); fprintf(stderr, __VA_ARGS__); exit(EXIT_FAILURE); }
 #define SOFT_ASSERT(_w, ...) if(!(_w)){ fprintf(stderr, COLOR_YELLOW "Qlang warning" COLOR_RESET ": "); fprintf(stderr, __VA_ARGS__); }
 
+// Debug
+void debugPrintTokens(struct qlangStruct *qlang);
+
 // Cleanup
 void destroyQlangStruct(struct qlangStruct *qlang);
 
